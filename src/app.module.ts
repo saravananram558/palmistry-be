@@ -7,9 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatStore } from './chat-store/entities/chat-store.entity';
 import { UserModule } from './user/user.module';
 import { Gender, UserDetails, ZodicSign } from './user/entities/user.entity';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [OpenaiModule, ChatStoreModule,
+    ServeStaticModule.forRoot({
+      rootPath: join('/home/finstein-emp/Documents/palmistory-BE/palmistry-be', 'uploads'),
+  }),
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DATABASE_HOST,
