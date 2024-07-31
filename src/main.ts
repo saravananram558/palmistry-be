@@ -40,7 +40,7 @@ async function bootstrap() {
   // fs.writeFileSync("./swagger-spec.json", JSON.stringify(document));
   SwaggerModule.setup("apidoc", app, document);
   // await app.listen(process.env.PORT);
-  await app.listen(5000);
+  await app.listen(4000);
   
 }
 bootstrap();

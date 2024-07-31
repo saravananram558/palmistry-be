@@ -47,11 +47,17 @@ async encodeImage(imagePath: string): Promise<string> {
 
 
 async getImageDetails(imagePath: string){
-  const file = await new OpenAI().files.create({
-    file: fs.createReadStream("myimage.png"),
+  const openai = new OpenAI({ apiKey: this.openaiApiKey });
+
+  console.log(imagePath,'imagepath checks')
+  const file = await openai.files.create({
+    file: fs.createReadStream('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg'),
     purpose: "vision",
   });
-  const thread = await new OpenAI().beta.threads.create({
+  console.log(file,'file checks')
+    // Use a publicly accessible URL for comparison
+    const referenceImageUrl = "https://example.com/reference-image.jpeg"; // Replace with actual URL
+  const thread = await openai.beta.threads.create({
     messages: [
       {
         "role": "user",
@@ -62,61 +68,153 @@ async getImageDetails(imagePath: string){
           },
           {
             "type": "image_url",
-            "image_url": {"url": "https://example.com/image.png"}
+            "image_url": {"url": referenceImageUrl}
           },
           {
             "type": "image_file",
             "image_file": {"file_id": file.id}
           },
+        ],
+        
+      }
+    ],
+  });
+
+  console.log(thread, 'thread checks');
+  // return thread;
+  // Check for results (example, adjust according to API documentation)
+  const stream = await openai.beta.threads.runs.stream(thread.id, {
+    assistant_id: this.chatAssistantId
+  });
+
+  console.log(stream, 'stream checks');
+  let assistantOutput = '';
+  // Handle the streaming response
+  assistantOutput = await new Promise<string>((resolve, reject) => {
+    stream
+      .on('textCreated', (text) => {
+        console.log('\nassistant >', text); // Adjust if needed
+      })
+      .on('textDelta', (textDelta) => {
+        assistantOutput += textDelta.value;
+      })
+      .on('end', () => {
+        resolve(assistantOutput);
+      })
+      .on('error', (err) => {
+        reject(err);
+      });
+  });
+  console.log(assistantOutput, 'stream checks');
+  return assistantOutput;
+  // return results;
+}
+
+
+
+async getPalmImgDetails(imagePath: string){
+  const openai = new OpenAI({ apiKey: this.openaiApiKey });
+  const base64Image = await this.encodeImage(imagePath);
+  // const url = "https://i.postimg.cc/43xHG1XZ/ss.jpg"
+  console.log('Base64 Image:', base64Image.substring(0, 100)); // Log only the beginning of the Base64 string for debugging
+  // const url= 'https://media.istockphoto.com/id/179042818/photo/man-performing-stop-gesture-with-hand.jpg?s=2048x2048&w=is&k=20&c=BHZ9aAshr4aF-NNVP_Z7xSywy9isfvrS6iAy6xyzLEo='
+  // const url = 'https://thumbs.dreamstime.com/z/female-palm-15629687.jpg?ct=jpeg'
+  const url = 'https://img.freepik.com/premium-photo/hand-palm-raised-up-white-background_326533-1325.jpg?w=740'
+  // const url = 'https://media.istockphoto.com/id/1359481287/photo/shot-of-an-unrecognizable-man-showing-his-palm-against-a-white-background.jpg?s=2048x2048&w=is&k=20&c=NJrOOlqKO7haktpFzvNVkP7ne9f_O-oTPO3lgTBPbO4='
+  const thread = await openai.beta.threads.create({
+    messages: [
+      {
+        "role": "user",
+        "content": [
+            {
+              "type": "text",
+              "text": "Explain about Palm?"
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": url,
+                "detail": "high"
+              }
+            },
         ]
       }
     ]
   });
-  return thread;
+  // return thread;
+  const stream = await openai.beta.threads.runs.stream(thread.id, {
+    assistant_id: this.chatAssistantId
+  });
+
+  console.log(stream, 'stream checks');
+  let assistantOutput = '';
+  // Handle the streaming response
+  assistantOutput = await new Promise<string>((resolve, reject) => {
+    stream
+      .on('textCreated', (text) => {
+        console.log('\nassistant >', text); // Adjust if needed
+      })
+      .on('textDelta', (textDelta) => {
+        assistantOutput += textDelta.value;
+      })
+      .on('end', () => {
+        resolve(assistantOutput);
+      })
+      .on('error', (err) => {
+        reject(err);
+      });
+  });
+  console.log(assistantOutput, 'stream checks');
+  return assistantOutput;
 }
 
 
-// async analyzeImage(imagePath: string): Promise<any> {
-//   console.log(imagePath,'imagePath checks in service')
-//   const base64Image = await this.encodeImage(imagePath);
-//   const headers = {
-//     'Content-Type': 'application/json',
-//     'Authorization': `Bearer ${this.openaiApiKey}`,
-//   };
 
-//   const payload = {
-//     model: 'gpt-4o-mini',
-//     messages: [
-//       {
-//         role: 'user',
-//         content: [
-//           {
-//             type: 'text',
-//             text: "What’s in this image?"
-//           },
-//           {
-//             type: 'image_url',
-//             image_url: {
-//               url: `data:image/jpeg;base64,${base64Image}`,
-//             },
-//           },
-//         ],
-//       },
-//     ],
-//     max_tokens: 300,
-//   };
-// console.log(payload,'payload checks')
-//   try {
-//     const response = await axios.post('https://api.openai.com/v1/chat/completions', payload, { headers });
-//     console.log(response,'response checks')
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error analyzing image:', error.message);
-//     throw new Error('Failed to analyze image');
-//   }
-// }
+
+
+
 
 async analyzeImage(imagePath: string): Promise<any> {
+  console.log(imagePath,'imagePath checks in service')
+  const base64Image = await this.encodeImage('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg');
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${this.openaiApiKey}`,
+  };
+
+  const payload = {
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: "What’s in this image?"
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${base64Image}`,
+            },
+          },
+        ],
+      },
+    ],
+    max_tokens: 300,
+  };
+console.log(payload,'payload checks')
+  try {
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', payload, { headers });
+    console.log(response,'response checks')
+    return response.data;
+  } catch (error) {
+    console.error('Error analyzing image:', error.message);
+    throw new Error('Failed to analyze image');
+  }
+}
+
+async analyzeImages(imagePath: string): Promise<any> {
   console.log(imagePath, 'imagePath checks in service');
   const base64Image = await this.encodeImage(imagePath);
   console.log('Base64 Image:', base64Image.substring(0, 100)); // Log only the beginning of the Base64 string for debugging

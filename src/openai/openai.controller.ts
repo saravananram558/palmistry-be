@@ -4,12 +4,14 @@ import { CreateOpenaiDto } from './dto/create-openai.dto';
 import { UpdateOpenaiDto } from './dto/update-openai.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import path from 'path';
+import * as path from 'path'; // Importing 'path' module
+import { v4 as uuidv4 } from 'uuid'; // Named import for the UUID function
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 
 @Controller('openai')
 @ApiBearerAuth()
-@ApiTags("pincone") 
+@ApiTags("openai") 
 export class OpenaiController {
   constructor(private readonly openaiService: OpenaiService) {}
 
@@ -17,9 +19,9 @@ export class OpenaiController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './uploads',
+      // destination: './uploads',
       filename: (req, file, cb) => {
-        const filename = path.parse(file.originalname).name.replace(/\s/g, '') + uuid();
+        const filename = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
         const extension = path.parse(file.originalname).ext;
         cb(null, `${filename}${extension}`);
       },
@@ -34,7 +36,7 @@ export class OpenaiController {
 
     try {
       console.log('inside try')
-      const result = await this.openaiService.analyzeImage(file.path);
+      const result = await this.openaiService.getPalmImgDetails(file.path);
       console.log(result,'result checksd')
       return result;
     } catch (error) {
@@ -42,6 +44,7 @@ export class OpenaiController {
       throw new BadRequestException('Failed to process image');
     }
   }
+
 
     @Post('chat')
     async chat(@Body('prompt') prompt: string, @Body('threadId') threadId: string) {
