@@ -27,11 +27,7 @@
     "@nestjs/platform-express": "^10.3.10",
     "@nestjs/serve-static": "^4.0.2",
     "@nestjs/swagger": "^7.4.0",
-<<<<<<< HEAD
-    "aws-sdk": "^2.1665.0",
-=======
     "@nestjs/typeorm": "^10.0.2",
->>>>>>> f14b6ad526ab84e3856ca5f632b572a4bcfe3587
     "axios": "^1.7.2",
     "express": "^4.19.2",
     "multer": "^1.4.5-lts.1",
