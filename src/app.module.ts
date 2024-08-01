@@ -5,6 +5,8 @@ import { OpenaiModule } from './openai/openai.module';
 import { ChatStoreModule } from './chat-store/chat-store.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatStore } from './chat-store/entities/chat-store.entity';
+import { UserModule } from './user/user.module';
+import { Gender, UserDetails, ZodicSign } from './user/entities/user.entity';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
@@ -21,8 +23,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       // synchronize: true,
-      entities:[ChatStore]
+      entities:[ChatStore, UserDetails, Gender, ZodicSign]
     }),
+    UserModule,
     ],
   controllers: [AppController],
   providers: [AppService],
