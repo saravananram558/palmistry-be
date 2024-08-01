@@ -117,9 +117,9 @@ async getPalmImgDetails(imagePath: string){
   const base64Image = await this.encodeImage(imagePath);
   // const url = "https://i.postimg.cc/43xHG1XZ/ss.jpg"
   console.log('Base64 Image:', base64Image.substring(0, 100)); // Log only the beginning of the Base64 string for debugging
-  // const url= 'https://media.istockphoto.com/id/179042818/photo/man-performing-stop-gesture-with-hand.jpg?s=2048x2048&w=is&k=20&c=BHZ9aAshr4aF-NNVP_Z7xSywy9isfvrS6iAy6xyzLEo='
+  const url= 'https://media.istockphoto.com/id/179042818/photo/man-performing-stop-gesture-with-hand.jpg?s=2048x2048&w=is&k=20&c=BHZ9aAshr4aF-NNVP_Z7xSywy9isfvrS6iAy6xyzLEo='
   // const url = 'https://thumbs.dreamstime.com/z/female-palm-15629687.jpg?ct=jpeg'
-  const url = 'https://img.freepik.com/premium-photo/hand-palm-raised-up-white-background_326533-1325.jpg?w=740'
+  // const url = 'https://img.freepik.com/premium-photo/hand-palm-raised-up-white-background_326533-1325.jpg?w=740'
   // const url = 'https://media.istockphoto.com/id/1359481287/photo/shot-of-an-unrecognizable-man-showing-his-palm-against-a-white-background.jpg?s=2048x2048&w=is&k=20&c=NJrOOlqKO7haktpFzvNVkP7ne9f_O-oTPO3lgTBPbO4='
   const thread = await openai.beta.threads.create({
     messages: [
