@@ -2,26 +2,26 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } f
 
 @Entity()
 export class UserDetails {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  zodiacSign: string;
+
+  @ManyToOne(() => Gender, (gender) => gender.id)
+  gender: number;
+
+  @Column({ type: 'date' })
+  dateOfBirth: string;
+
+  @Column({ type: 'time' })
+  timeOfBirth: string; 
   
-    @Column()
-    name: string;
-  
-    @ManyToOne(() => ZodicSign, ZodicSign => ZodicSign.id)
-    zodicSign: number;
-
-    @ManyToOne(() => Gender, Gender => Gender.id)
-    gender: number;
-
-    @Column()
-    dateOfBirth: string;
-
-    @Column()
-    timeOfBirth:string;
-
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 }
 
 @Entity()
@@ -31,13 +31,4 @@ export class Gender {
   
     @Column()
     genderType: string;
-}
-
-@Entity()
-export class ZodicSign {
-    @PrimaryGeneratedColumn()
-    id: number;
-  
-    @Column()
-    signName: string;
 }

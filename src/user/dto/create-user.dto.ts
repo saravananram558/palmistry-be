@@ -1,39 +1,15 @@
-import { IsNotEmpty, IsString, IsDateString, IsOptional, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsDateString, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
-    @IsNotEmpty()
-    @IsString()
     name: string;
-
-    @IsNotEmpty()
-    @IsInt()
-    zodicSign: number; 
-
-    @IsNotEmpty()
-    @IsInt()
-    gender: number; 
-
-    @IsNotEmpty()
-    @IsDateString()
+    zodiacSign: string;
+    gender: number;  // This will be an ID, which you will use to fetch the `Gender` entity
     dateOfBirth: string;
-
-    @IsNotEmpty()
-    @IsString()
-    timeOfBirth: string; 
-
-    @IsOptional()
-    @IsDateString()
-    createdAt?: Date;
-}
+    timeOfBirth: string;
+  }
 
 export class CreateGenderDto {
     @IsNotEmpty()
     @IsString()
     genderType: string;
-}
-
-export class CreateZodiacSignDto {
-    @IsNotEmpty()
-    @IsString()
-    signName: string;
 }
