@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatStoreDto } from './dto/create-chat-store.dto';
-import { UpdateChatStoreDto } from './dto/update-chat-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChatStore, Conversation } from './entities/chat-store.entity';
+import { ChatStore, ConversationChat } from './entities/chat-store.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -10,8 +8,8 @@ export class ChatStoreService {
   constructor(
     @InjectRepository(ChatStore)
     private chatRepository: Repository<ChatStore>,
-    @InjectRepository(Conversation)
-    private readonly conversationRepository: Repository<Conversation>
+    @InjectRepository(ConversationChat)
+    private readonly conversationRepository: Repository<ConversationChat>
   ) {}
 
   async saveChat(threadId: string, from: string, content: string, time: string): Promise<ChatStore> {
@@ -23,11 +21,11 @@ export class ChatStoreService {
     return this.chatRepository.find({ where: { threadId } });
   }
 
-  async saveConversation(conversation: Conversation): Promise<Conversation> {
+  async saveConversation(conversation: ConversationChat): Promise<ConversationChat> {
     return this.conversationRepository.save(conversation);
   }
 
-  async getConversationsWithMessages(): Promise<Conversation[]> {
+  async getConversationsWithMessages(): Promise<ConversationChat[]> {
     return this.conversationRepository.createQueryBuilder('conversation')
       .leftJoinAndSelect('conversation.messages', 'message')
       .orderBy('conversation.createdAt', 'DESC')

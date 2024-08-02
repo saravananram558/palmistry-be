@@ -32,3 +32,24 @@ export class Gender {
     @Column()
     genderType: string;
 }
+
+@Entity()
+export class SignupDetails {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userName: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  mobileNumber: string;
+
+  @Column()
+  password:string;
+  
+  @CreateDateColumn()
+  createdAt: Date;
+}
