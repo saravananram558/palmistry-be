@@ -197,8 +197,87 @@ async  publicImage(imagepath: string): Promise<string | undefined> {
   }
 }
 
+// async storedFileData(){
+//   const openai = new OpenAI({ apiKey: this.openaiApiKey });
+//   // A user wants to attach a file to a specific message, let's upload it.
+//   // Step 1: Upload a File with an "assistants" purpose
+// const aapl10k = await openai.files.create({
+//   file: fs.createReadStream("edgar/aapl-10k.pdf"),
+//   purpose: "assistants",
+// });
+
+// // Step 2: Create an Assistant
+// const assistant = await openai.beta.assistants.create({
+//   name: "Financial Analyst Assistant",
+//   instructions: "You are an expert financial analyst. Use you knowledge base to answer questions about audited financial statements.",
+//   model: "gpt-4o",
+//   tools: [{ type: "file_search" }],
+// });
+
+// // Step 3: Create a Thread
+// const thread = await openai.beta.threads.create({
+//   messages: [
+//     {
+//       role: "user",
+//       content:
+//         "How many shares of AAPL were outstanding at the end of of October 2023?",
+//       // Attach the new file to the message.
+//       attachments: [{ file_id: aapl10k.id, tools: [{ type: "file_search" }] }],
+//     },
+//   ],
+// });
+
+// // Step 4: Run the Assistant
+// const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+//   assistant_id: assistant.id,
+// })
+
+//   // Step 5: Periodically retrieve the Run to check on its status to see if it has moved to completed
+//   const messages = await openai.beta.threads.messages.list(thread.id, {
+//     run_id: run.id,
+//   });
 
 
+//   const message = messages.data.pop()!;
+// if (message.content[0].type === "text") {
+//   const { text } = message.content[0];
+//   const { annotations } = text;
+//   const citations: string[] = [];
+
+//   let index = 0;
+//   for (let annotation of annotations) {
+//     text.value = text.value.replace(annotation.text, "[" + index + "]");
+//     const { file_citation } = annotation;
+//     if (file_citation) {
+//       const citedFile = await openai.files.retrieve(file_citation.file_id);
+//       citations.push("[" + index + "]" + citedFile.filename);
+//     }
+//     index++;
+//   }
+
+//   console.log(text.value);
+//   console.log(citations.join("\n"));
+
+// }
+
+// }
+
+
+async  setupAssistantAndRunQuery(url) {
+
+  const openai = new OpenAI({ apiKey: this.openaiApiKey });
+  try {
+  
+    const file:any = await openai.files.create({
+      file: fs.createReadStream(url),
+      purpose: "assistants",
+    })
+    
+  console.log(file,'file checks')
+  } catch (error) {
+    console.error('Error during setup and query:', error);
+  }
+}
 
 
 
@@ -206,6 +285,7 @@ async  publicImage(imagepath: string): Promise<string | undefined> {
 async getPalmImgDetails(imagePath: string){
   const openai = new OpenAI({ apiKey: this.openaiApiKey });
   const imgUrl = await this.publicImage(imagePath);
+  this.setupAssistantAndRunQuery(imagePath)
   console.log(imgUrl,'imgUrl checks')
   // Define the URL to use in the API request
   const url = imgUrl; // Use the URL obtained from publicImage
