@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateSignupUserDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Gender, SignupDetails, UserDetails } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -50,31 +51,60 @@ export class UserService {
   }
 
   async signUpUser(createSignupUserDto: CreateSignupUserDto): Promise<SignupDetails> {
-    
     const { userName, email, mobileNumber, password } = createSignupUserDto;
-
-   
+  
+    // Check if the user already exists
     const existingUser = await this.signupDetailsRepository.findOne({ where: { email } });
     if (existingUser) {
+      // Throw a specific error to be caught by the controller
       throw new Error('A user with this email already exists.');
     }
-    
+  
+    // Hash the password and create a new user
     const hashedPassword = await this.hashPassword(password);
-
-    // Create a new user entity
     const newUser = this.signupDetailsRepository.create({
       userName: userName,
-      email:email,
-      mobileNumber:mobileNumber,
+      email: email,
+      mobileNumber: mobileNumber,
       password: hashedPassword,
     });
-
+  
     return await this.signupDetailsRepository.save(newUser);
   }
+  
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
+  }
+
+  async findUserByEmail(email: string): Promise<SignupDetails | null> {
+    return this.signupDetailsRepository.findOne({ where: { email } });
+  }
+
+  async verifyPassword(user: SignupDetails, password: string): Promise<boolean> {
+    return bcrypt.compare(password, user.password);
+  }
+
+  async loginUser(email: string, password: string): Promise<any> {
+    const user = await this.findUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await this.verifyPassword(user, password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const token = this.generateJwtToken(user);
+
+    return { message: 'Login successful', token };
+  }
+
+  private generateJwtToken(user: SignupDetails): string {
+    const payload = { email: user.email, userId: user.id };
+    return jwt.sign(payload, 'your-secret-key', { expiresIn: '1h' }); // Adjust the secret key and expiration time
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDetails> {
