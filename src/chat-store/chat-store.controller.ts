@@ -1,8 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ChatStoreService } from './chat-store.service';
-import { CreateChatStoreDto } from './dto/create-chat-store.dto';
-import { UpdateChatStoreDto } from './dto/update-chat-store.dto';
-import { ChatStore, Conversation } from './entities/chat-store.entity';
+import { ChatStore, ConversationChat } from './entities/chat-store.entity';
 
 @Controller('chat-store')
 export class ChatStoreController {
@@ -22,17 +20,17 @@ export class ChatStoreController {
   }
 
   @Get('conversations')
-  async getConversations(): Promise<Conversation[]> {
+  async getConversations(): Promise<ConversationChat[]> {
     return this.chatStoreService.getConversationsWithMessages();
   }
 
   @Post('create-conversation')
   async createConversation(@Body('initialMessage') initialMessage: string) {
     const topic = this.extractTopic(initialMessage); // Function to determine topic
-    const conversation = new Conversation();
+    const conversation = new ConversationChat();
     conversation.topic = topic;
     conversation.createdAt = new Date();
-    conversation.messages = [];
+    // conversation.messages = [];
 
     await this.chatStoreService.saveConversation(conversation);
 

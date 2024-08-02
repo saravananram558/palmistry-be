@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateSignupUserDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Gender, UserDetails } from './entities/user.entity';
+import { Gender, SignupDetails, UserDetails } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(
+    @InjectRepository(SignupDetails)
+    private readonly signupDetailsRepository: Repository<SignupDetails>,
     @InjectRepository(UserDetails)
     private readonly userDetailsRepository: Repository<UserDetails>,
     @InjectRepository(Gender)
@@ -44,6 +47,34 @@ export class UserService {
     });
   
     return await this.userDetailsRepository.save(userDetails);
+  }
+
+  async signUpUser(createSignupUserDto: CreateSignupUserDto): Promise<SignupDetails> {
+    
+    const { userName, email, mobileNumber, password } = createSignupUserDto;
+
+   
+    const existingUser = await this.signupDetailsRepository.findOne({ where: { email } });
+    if (existingUser) {
+      throw new Error('A user with this email already exists.');
+    }
+    
+    const hashedPassword = await this.hashPassword(password);
+
+    // Create a new user entity
+    const newUser = this.signupDetailsRepository.create({
+      userName: userName,
+      email:email,
+      mobileNumber:mobileNumber,
+      password: hashedPassword,
+    });
+
+    return await this.signupDetailsRepository.save(newUser);
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDetails> {

@@ -13,3 +13,10 @@ export class CreateGenderDto {
     @IsString()
     genderType: string;
 }
+
+export class CreateSignupUserDto {
+  userName: string;
+  email: string;
+  mobileNumber: string;
+  password: string;
+}

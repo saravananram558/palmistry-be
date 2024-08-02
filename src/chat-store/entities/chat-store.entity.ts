@@ -17,7 +17,7 @@ export class ChatStore {
   @Column()
   time: string;
 
-  @ManyToOne(() => Conversation, conversation => conversation.messages)
+  @ManyToOne(() => ConversationChat, conversation => conversation.topic)
   conversation: string;
 
   @CreateDateColumn()
@@ -25,7 +25,7 @@ export class ChatStore {
 }
 
 @Entity()
-export class Conversation {
+export class ConversationChat {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -37,7 +37,4 @@ export class Conversation {
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @OneToMany(() => ChatStore, chatStore => chatStore.conversation)
-  messages: ChatStore[];
 }

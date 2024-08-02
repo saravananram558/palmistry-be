@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ChatStoreService } from './chat-store.service';
 import { ChatStoreController } from './chat-store.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChatStore, Conversation } from './entities/chat-store.entity';
+import { ChatStore, ConversationChat } from './entities/chat-store.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChatStore, Conversation])],
+  imports: [TypeOrmModule.forFeature([ChatStore, ConversationChat])],
   controllers: [ChatStoreController],
   providers: [ChatStoreService],
 })
