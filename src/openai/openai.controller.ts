@@ -7,6 +7,9 @@ import { diskStorage } from 'multer';
 import * as path from 'path'; // Importing 'path' module
 import { v4 as uuidv4 } from 'uuid'; // Named import for the UUID function
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import * as fs from 'fs';
+
+
 
 
 @Controller('openai')
@@ -16,27 +19,38 @@ export class OpenaiController {
   constructor(private readonly openaiService: OpenaiService) {}
 
 
+
+
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      // destination: './uploads',
-      filename: (req, file, cb) => {
-        const filename = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-        const extension = path.parse(file.originalname).ext;
-        cb(null, `${filename}${extension}`);
-      },
-    }),
-  }))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Body('prompt') prompt: string) {
+  @UseInterceptors(FileInterceptor('file'))
+  // @UseInterceptors(FileInterceptor('file', {
+  //   storage: diskStorage({
+  //     destination: './uploads',
+  //     filename: (req, file, cb) => {
+  //       const filename = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+  //       const extension = path.parse(file.originalname).ext;
+  //       cb(null, `${filename}${extension}`);
+  //     },
+  //   }),
+  // }))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+
+    console.log(file,'file checks')
+       const savePath = path.join(
+      '/home/finstein-emp/Documents/palmistory-BE/palmistry-be/uploads',
+      file.originalname,
+    );
+
     if (!file) {
       throw new BadRequestException('File is missing');
     }
-
-    console.log('File path:', file.path); // Debugging line to check file path
+console.log(file,'file checks')
+    console.log('File path:', savePath); // Debugging line to check file path
 
     try {
+      fs.writeFileSync(savePath, file.buffer);
       console.log('inside try')
-      const result = await this.openaiService.getPalmImgDetails(file.path);
+      const result = await this.openaiService.getPalmImgDetails(savePath);
       console.log(result,'result checksd')
       return result;
     } catch (error) {
