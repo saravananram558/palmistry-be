@@ -99,7 +99,7 @@ export class UserService {
 
     const token = this.generateJwtToken(user);
 
-    return { message: 'Login successful', token };
+    return { success: true, message: 'Login successfully', userId: user.id, token: token };
   }
 
   private generateJwtToken(user: SignupDetails): string {
@@ -154,5 +154,17 @@ export class UserService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+  }
+
+  async getProfileDetails(userId: number): Promise<UserDetails> {
+    let userData = await this.userDetailsRepository.createQueryBuilder('ud')
+    .leftJoin(Gender,'g','ud.gender = g.id')
+    .select('ud.id as gender, ud.name as userName, ud.dateOfBirth as dateOfBirth, ud.timeOfBirth as timeOfBirth')
+    .getRawOne();
+    if (userData.timeOfBirth) {
+      const timeParts = userData.timeOfBirth.split(':');
+      userData.timeOfBirth = `${timeParts[0]}:${timeParts[1]}`;
+    }  
+    return userData;
   }
 }

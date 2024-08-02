@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateSignupUserDto, CreateUserDto, LoginDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDetails } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -58,4 +58,10 @@ export class UserController {
       };
     }
   }
+
+  @Get('profileDetails/:id')
+  async getProfileDetails(@Param('id') id: number): Promise<UserDetails> {
+    return this.userService.getProfileDetails(id);
+  }
+  
 }
