@@ -37,7 +37,8 @@ export class OpenaiController {
 
     console.log(file,'file checks')
        const savePath = path.join(
-      '/home/finstein-emp/Documents/palmistory-BE/palmistry-be/uploads',
+      // '/home/finstein-emp/Documents/palmistory-BE/palmistry-be/uploads',
+      '/home/finstein-emp/palmistry-be/palm-be/uploads',
       file.originalname,
     );
 

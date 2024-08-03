@@ -122,7 +122,8 @@ async encodeImage(imagePath: string): Promise<string> {
 async publicImages(imagePath: string) {
   console.log(imagePath,'imagePath')
   // Ensure the correct file path without redundant directory segments
-  const filePath = join('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/uploads', imagePath);
+  // const filePath = join('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/uploads', imagePath);
+  const filePath = join('/home/finstein-emp/palmistry-be/palm-be/uploads', imagePath);
 
   // Check if the file exists before uploading to Cloudinary
   try {
@@ -393,7 +394,8 @@ async getImageDetails(imagePath: string){
 
   console.log(imagePath,'imagepath checks')
   const file = await openai.files.create({
-    file: fs.createReadStream('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg'),
+    // file: fs.createReadStream('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg'),
+    file: fs.createReadStream('/home/finstein-emp/palmistry-be/palm-be/assets/palm-reas.jpeg'),
     purpose: "vision",
   });
   console.log(file,'file checks')
@@ -456,7 +458,8 @@ async getImageDetails(imagePath: string){
 
 async analyzeImage(imagePath: string): Promise<any> {
   console.log(imagePath,'imagePath checks in service')
-  const base64Image = await this.encodeImage('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg');
+  // const base64Image = await this.encodeImage('/home/finstein-emp/Documents/palmistory-BE/palmistry-be/assets/palm-reas.jpeg');
+  const base64Image = await this.encodeImage('/home/finstein-emp/palmistry-be/palm-be/assets/palm-reas.jpeg');
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${this.openaiApiKey}`,
