@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsString, IsDateString, IsNumber, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
+    userId:number;
     name: string;
     zodiacSign: string;
     gender: number;  // This will be an ID, which you will use to fetch the `Gender` entity

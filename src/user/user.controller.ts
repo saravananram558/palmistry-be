@@ -16,8 +16,12 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('addUserDetails')
-  addUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async addUser(@Body() createUserDto: CreateUserDto): Promise<UserDetails> {
+    if (createUserDto.userId) {
+      return this.userService.updateUserDetails(createUserDto.userId, createUserDto);
+    } else {
+      return this.userService.createUserDetails(createUserDto);
+    }
   }
 
   @Post('signUpDetails')

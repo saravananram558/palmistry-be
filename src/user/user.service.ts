@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateSignupUserDto, CreateUserDto, GoogleLoginDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Gender, SignupDetails, UserDetails } from './entities/user.entity';
@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-
+import * as moment from 'moment';
 @Injectable()
 export class UserService {
   constructor(
@@ -18,36 +18,71 @@ export class UserService {
     private readonly genderRepository: Repository<Gender>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserDetails> {
-    const dateOfBirth = createUserDto.dateOfBirth;
+  async createUserDetails(createUserDto: CreateUserDto): Promise<UserDetails> {
+    const { dateOfBirth, timeOfBirth } = createUserDto;
 
-    // Debug: Log the received dateOfBirth value
-    console.log('Received dateOfBirth:', dateOfBirth);
-  
     // Validate the date format (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
       throw new Error('Invalid dateOfBirth format');
     }
-  
+
     // Parse the date
     const date = new Date(dateOfBirth);
     if (isNaN(date.getTime())) {
       throw new Error('Invalid dateOfBirth value');
     }
-  
-    const timeOfBirth: string = createUserDto.timeOfBirth;
-    if (!/^\d{2}:\d{2}:\d{2}$/.test(timeOfBirth)) {
+
+    // Convert timeOfBirth to 24-hour format
+    let formattedTimeOfBirth: string;
+    try {
+      formattedTimeOfBirth = moment(timeOfBirth, 'h:mm A').format('HH:mm:ss');
+    } catch (error) {
       throw new Error('Invalid timeOfBirth format');
     }
+
     const userDetails = this.userDetailsRepository.create({
       name: createUserDto.name,
       zodiacSign: createUserDto.zodiacSign,
       gender: createUserDto.gender,
       dateOfBirth: dateOfBirth,
-      timeOfBirth: timeOfBirth,
+      timeOfBirth: formattedTimeOfBirth,
     });
-  
+
     return await this.userDetailsRepository.save(userDetails);
+  }
+
+  async updateUserDetails(userId: number, updateUserDto: CreateUserDto): Promise<UserDetails> {
+    const user = await this.userDetailsRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Update fields
+    user.name = updateUserDto.name;
+    user.zodiacSign = updateUserDto.zodiacSign;
+    user.gender = updateUserDto.gender;
+    user.dateOfBirth = updateUserDto.dateOfBirth;
+
+    // Convert timeOfBirth to 24-hour format
+    // let formattedTimeOfBirth: string;
+    // try {
+    //   formattedTimeOfBirth = moment(updateUserDto.timeOfBirth, 'h:mm A').format('HH:mm:ss');
+    // } catch (error) {
+    //   throw new Error('Invalid timeOfBirth format');
+    // }
+
+    // user.timeOfBirth = formattedTimeOfBirth;
+    let formattedTimeOfBirth: string;
+try {
+  formattedTimeOfBirth = moment(updateUserDto.timeOfBirth, 'HH:mm:ss').format('HH:mm:ss');
+} catch (error) {
+  throw new Error('Invalid timeOfBirth format');
+}
+
+user.timeOfBirth = formattedTimeOfBirth;
+
+    return await this.userDetailsRepository.save(user);
   }
 
   async signUpUser(createSignupUserDto: CreateSignupUserDto): Promise<SignupDetails> {
@@ -183,7 +218,7 @@ export class UserService {
     }else{
       let userData = await this.userDetailsRepository.createQueryBuilder('ud')
       .leftJoin(Gender,'g','ud.gender = g.id')
-      .select('ud.id as id, ud.gender as gender, ud.name as userName, ud.dateOfBirth as dateOfBirth, ud.timeOfBirth as timeOfBirth')
+      .select('ud.id as id, ud.gender as gender, ud.name as userName, ud.dateOfBirth as dateOfBirth, ud.timeOfBirth as timeOfBirth, ud.zodiacSign as zodiacSign')
       .getRawOne();
       if (userData.timeOfBirth) {
         const timeParts = userData.timeOfBirth.split(':');
