@@ -18,9 +18,8 @@ export class UserController {
   @Post('addUserDetails')
   async addUser(@Body() createUserDto: CreateUserDto): Promise<UserDetails> {
     if (createUserDto.userId) {
-      return this.userService.updateUserDetails(createUserDto.userId, createUserDto);
-    } else {
       return this.userService.createUserDetails(createUserDto);
+    } else {
     }
   }
 

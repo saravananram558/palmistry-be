@@ -19,8 +19,7 @@ export class UserService {
   ) {}
 
   async createUserDetails(createUserDto: CreateUserDto): Promise<UserDetails> {
-    const { dateOfBirth, timeOfBirth } = createUserDto;
-
+    const { dateOfBirth, timeOfBirth, userId } = createUserDto;
     // Validate the date format (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
       throw new Error('Invalid dateOfBirth format');
@@ -46,43 +45,10 @@ export class UserService {
       gender: createUserDto.gender,
       dateOfBirth: dateOfBirth,
       timeOfBirth: formattedTimeOfBirth,
+      user: userId
     });
 
     return await this.userDetailsRepository.save(userDetails);
-  }
-
-  async updateUserDetails(userId: number, updateUserDto: CreateUserDto): Promise<UserDetails> {
-    const user = await this.userDetailsRepository.findOneBy({ id: userId });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    // Update fields
-    user.name = updateUserDto.name;
-    user.zodiacSign = updateUserDto.zodiacSign;
-    user.gender = updateUserDto.gender;
-    user.dateOfBirth = updateUserDto.dateOfBirth;
-
-    // Convert timeOfBirth to 24-hour format
-    // let formattedTimeOfBirth: string;
-    // try {
-    //   formattedTimeOfBirth = moment(updateUserDto.timeOfBirth, 'h:mm A').format('HH:mm:ss');
-    // } catch (error) {
-    //   throw new Error('Invalid timeOfBirth format');
-    // }
-
-    // user.timeOfBirth = formattedTimeOfBirth;
-    let formattedTimeOfBirth: string;
-try {
-  formattedTimeOfBirth = moment(updateUserDto.timeOfBirth, 'HH:mm:ss').format('HH:mm:ss');
-} catch (error) {
-  throw new Error('Invalid timeOfBirth format');
-}
-
-user.timeOfBirth = formattedTimeOfBirth;
-
-    return await this.userDetailsRepository.save(user);
   }
 
   async signUpUser(createSignupUserDto: CreateSignupUserDto): Promise<SignupDetails> {

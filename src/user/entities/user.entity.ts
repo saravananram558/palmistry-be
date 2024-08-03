@@ -14,6 +14,9 @@ export class UserDetails {
   @ManyToOne(() => Gender, (gender) => gender.id)
   gender: number;
 
+  @ManyToOne(() => SignupDetails, (user) => user.id)
+  user: number;
+
   @Column({ type: 'date' })
   dateOfBirth: string;
 
