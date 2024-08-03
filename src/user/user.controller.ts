@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateSignupUserDto, CreateUserDto, LoginDto } from './dto/create-user.dto';
+import { CreateSignupUserDto, CreateUserDto, GoogleLoginDto, LoginDto } from './dto/create-user.dto';
 import { UserDetails } from './entities/user.entity';
 
 @Controller('user')
@@ -58,6 +58,20 @@ export class UserController {
       };
     }
   }
+
+  @Post('google-login')
+  async googleLogin(@Body() googleLoginDto: GoogleLoginDto): Promise<any> {
+    try {
+      const result = await this.userService.googleLogin(googleLoginDto);
+      return { success: true, ...result };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'An error occurred during Google login.',
+      };
+    }
+  }
+
 
   @Get('profileDetails/:id')
   async getProfileDetails(@Param('id') id: number): Promise<UserDetails> {

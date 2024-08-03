@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDateString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsDateString, IsNumber, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
     name: string;
@@ -24,4 +24,12 @@ export class CreateSignupUserDto {
 export class LoginDto {
   email: string;
   password: string;
+}
+
+export class GoogleLoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  displayName: string;
 }

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateSignupUserDto, CreateUserDto } from './dto/create-user.dto';
+import { CreateSignupUserDto, CreateUserDto, GoogleLoginDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Gender, SignupDetails, UserDetails } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -72,7 +72,6 @@ export class UserService {
     return await this.signupDetailsRepository.save(newUser);
   }
   
-
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
@@ -100,6 +99,27 @@ export class UserService {
     const token = this.generateJwtToken(user);
 
     return { success: true, message: 'Login successfully', userId: user.id, token: token };
+  }
+
+  async googleLogin(googleLoginDto: GoogleLoginDto): Promise<any> {
+    const { email, displayName } = googleLoginDto;
+    let user = await this.findUserByEmail(email);
+    if (!user) {
+      user = this.signupDetailsRepository.create({
+        email,
+        userName: displayName,
+        mobileNumber: '', 
+        password: '',
+        provider: 'google',
+      });
+      await this.signupDetailsRepository.save(user);
+    } else {
+      user.userName = displayName;
+      user.provider = 'google';
+      await this.signupDetailsRepository.save(user);
+    }
+    const token = this.generateJwtToken(user);
+    return { message: 'Google login successful', userId: user.id, token };
   }
 
   private generateJwtToken(user: SignupDetails): string {
@@ -157,14 +177,19 @@ export class UserService {
   }
 
   async getProfileDetails(userId: number): Promise<UserDetails> {
-    let userData = await this.userDetailsRepository.createQueryBuilder('ud')
-    .leftJoin(Gender,'g','ud.gender = g.id')
-    .select('ud.id as gender, ud.name as userName, ud.dateOfBirth as dateOfBirth, ud.timeOfBirth as timeOfBirth')
-    .getRawOne();
-    if (userData.timeOfBirth) {
-      const timeParts = userData.timeOfBirth.split(':');
-      userData.timeOfBirth = `${timeParts[0]}:${timeParts[1]}`;
-    }  
-    return userData;
+    const user = await this.userDetailsRepository.findOneBy({ id:userId });
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }else{
+      let userData = await this.userDetailsRepository.createQueryBuilder('ud')
+      .leftJoin(Gender,'g','ud.gender = g.id')
+      .select('ud.id as id, ud.gender as gender, ud.name as userName, ud.dateOfBirth as dateOfBirth, ud.timeOfBirth as timeOfBirth')
+      .getRawOne();
+      if (userData.timeOfBirth) {
+        const timeParts = userData.timeOfBirth.split(':');
+        userData.timeOfBirth = `${timeParts[0]}:${timeParts[1]}`;
+      }  
+      return userData;
+    }
   }
 }

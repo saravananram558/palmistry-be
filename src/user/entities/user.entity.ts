@@ -44,11 +44,14 @@ export class SignupDetails {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true }) 
   mobileNumber: string;
 
   @Column()
   password:string;
+
+  @Column({ nullable: true })
+  provider: string;
   
   @CreateDateColumn()
   createdAt: Date;
